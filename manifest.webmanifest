@@ -1,0 +1,25 @@
+{
+  "name": "Lindas Revolt",
+  "short_name": "Lindas Revolt",
+  "description": "Din dagliga träningsstund, en dag i taget.",
+  "lang": "sv",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f9ebed",
+  "theme_color": "#f9ebed",
+  "icons": [
+    {
+      "src": "./assets/apple-touch-icon.png",
+      "sizes": "180x180",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

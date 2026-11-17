@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 180" role="img" aria-label="Lindas Revolt">
+<rect width="180" height="180" rx="42" fill="#f9ebed"/>
+<circle cx="90" cy="90" r="67" fill="#f9ecdd"/>
+<g stroke="#a7687c" stroke-width="13" stroke-linecap="round">
+<path d="M90 42v96M42 90h96M56 56l68 68M124 56l-68 68"/>
+</g>
+<circle cx="90" cy="90" r="11" fill="#614932"/>
+</svg>
