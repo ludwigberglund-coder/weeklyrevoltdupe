@@ -43,7 +43,9 @@
           if (Object.prototype.hasOwnProperty.call(window.LINDA_PROGRAM.exercises, id) && number !== null) overrides[id] = number;
         });
       }
-      days[date] = { done: done, boost: item.boost === true, overrides: overrides };
+      const note = typeof item.note === "string" ? item.note.trim().slice(0, 280) : "";
+      const feeling = ["easy", "steady", "hard"].includes(item.feeling) ? item.feeling : "";
+      days[date] = { done: done, boost: item.boost === true, overrides: overrides, note: note, feeling: feeling };
     });
     return { schema: 1, startDate: raw.startDate, days: days };
   }

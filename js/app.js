@@ -141,6 +141,49 @@
     html += '</div>';
     return html;
   }
+  function weekControls(date) {
+    const current = Math.floor(dayNumber(date) / 7);
+    const canGoForward = current < P.weeks.length - 1 &&
+      isAvailableDay(addDays(state.data.startDate, (current + 1) * 7));
+    return '<div class="week-controls" role="group" aria-label="Byt vecka">' +
+      '<button type="button" class="week-arrow" data-action="week-shift" data-shift="-1" aria-label="Föregående vecka"' +
+      (current === 0 ? ' disabled' : '') + '>‹</button>' +
+      '<button type="button" class="week-arrow" data-action="week-shift" data-shift="1" aria-label="Nästa vecka"' +
+      (canGoForward ? '' : ' disabled') + '>›</button></div>';
+  }
+  function weekProgress(date) {
+    const first = addDays(state.data.startDate, Math.floor(dayNumber(date) / 7) * 7);
+    let count = 0;
+    for (let i = 0; i < 7; i++) if (isComplete(addDays(first, i))) count++;
+    return '<div class="week-progress" aria-label="' + count + ' av 7 dagar klara denna vecka">' +
+      '<div class="week-progress-label"><span>Den här veckan</span><strong>' + count + ' / 7 dagar</strong></div>' +
+      '<div class="progress-track"><div class="progress-fill" style="width:' + Math.round(count / 7 * 100) +
+      '%"></div></div></div>';
+  }
+  function renderJournal(date) {
+    const record = dayData(date);
+    const feelings = [
+      { value: "easy", label: "Lätt", icon: "☀" },
+      { value: "steady", label: "Lagom", icon: "♡" },
+      { value: "hard", label: "Utmanande", icon: "✦" }
+    ];
+    return '<section class="journal-card card" aria-labelledby="journal-heading">' +
+      '<p class="daily-kicker">EN STUND FÖR DIG</p><h2 id="journal-heading">Hur kändes det idag?</h2>' +
+      '<p>En kort reflektion hjälper dig att se hur långt du har kommit.</p>' +
+      '<form id="journal-form" class="journal-form">' +
+      '<fieldset class="feeling-fieldset"><legend>Hur kändes övningarna?</legend><div class="feeling-options">' +
+      feelings.map(function (option) {
+        return '<label class="feeling-option"><input type="radio" name="feeling" value="' + option.value + '"' +
+          (record.feeling === option.value ? ' checked' : '') + '>' +
+          '<span><span aria-hidden="true">' + option.icon + '</span> ' + option.label + '</span></label>';
+      }).join("") + '</div></fieldset>' +
+      '<label class="form-label" for="journal-note">En liten anteckning (valfritt)</label>' +
+      '<textarea id="journal-note" name="note" class="note-input" maxlength="280" rows="3" ' +
+      'placeholder="Vad kändes bra? Något du vill komma ihåg?">' +
+      escapeHtml(record.note || "") + '</textarea>' +
+      '<div class="journal-actions"><span>Sparas privat på din enhet.</span>' +
+      '<button type="submit" class="btn-primary">Spara</button></div></form></section>';
+  }
   function exerciseRow(date, id) {
     const e = P.exercises[id];
     const done = dayData(date).done[id] === true;
@@ -183,14 +226,16 @@
     return '<div class="section-stack">' + warning() +
       (completed ? '<div class="done-banner">🎉 Du har nått slutet av de 10 veckorna! Se tillbaka på allt du har gjort under Framsteg, eller börja en ny omgång under Mer.</div>' : '') +
       '<section class="day-select"><div class="section-header"><h2>Din vecka <span style="color:var(--rose)">✳</span></h2>' +
-      '<span class="pill">Vecka ' + week.number + ' av 10</span></div>' +
+      '<div class="week-tools"><span class="pill">Vecka ' + week.number + ' av 10</span>' +
+      weekControls(date) + '</div></div>' +
       dayStrip(date) + '<div class="day-note"><span>' + (date === S.today() ? 'Idag, ' : '') +
       escapeHtml(formatDate(date)) + (date === S.today() ? '' : ' · Dag ' + (dayNumber(date) + 1)) + '</span>' +
       (date === S.today() || !isAvailableDay(S.today()) ? '' : '<button class="text-button" type="button" data-action="jump-today">Till idag</button>') +
-      '</div></section>' +
+      '</div>' + weekProgress(date) + '</section>' +
       '<section><div class="section-header"><h2>Dina dagliga</h2><span class="pill pill-rose">' +
       (isComplete(date) ? '✓ Klart!' : '♡ För dig, Linda') + '</span></div>' +
       dailyCard(date) + '</section>' +
+      renderJournal(date) +
       '<section class="week-summary"><div><span class="tiny" style="font-weight:800;letter-spacing:.1em">DIN FINA FRAMGÅNG</span>' +
       '<h3>' + stats.completedDays + ' avklarade dagar</h3><p>Varje liten stund räknas. Fortsätt i din takt!</p></div>' +
       '<span class="flower" aria-hidden="true">✻</span></section>' +
@@ -249,6 +294,25 @@
     return html + '</div><div class="calendar-legend"><span><i class="legend-dot"></i>Avklarat</span>' +
       '<span><i class="legend-dot is-partial"></i>Påbörjat</span></div></section>';
   }
+  function renderReflections() {
+    const names = { easy: "Lätt", steady: "Lagom", hard: "Utmanande" };
+    const entries = Object.keys(state.data.days).filter(function (date) {
+      const item = dayData(date);
+      return isAvailableDay(date) && (item.note || names[item.feeling]);
+    }).sort().reverse().slice(0, 4);
+    if (!entries.length) return '<section class="settings-card"><h2>Dina reflektioner</h2>' +
+      '<p style="margin-bottom:0">När du skriver några ord om en dag dyker de upp här. Små minnen av din träning.</p></section>';
+    return '<section class="reflection-section"><div class="section-header"><h2>Dina reflektioner</h2>' +
+      '<span class="pill">Senaste 4</span></div><div class="reflection-list">' +
+      entries.map(function (date) {
+        const item = dayData(date);
+        return '<article class="reflection-item"><div><strong>' + escapeHtml(formatDate(date)) +
+          '</strong>' + (names[item.feeling] ? '<span class="reflection-feeling">' + names[item.feeling] + '</span>' : '') +
+          '</div>' + (item.note ? '<p>' + escapeHtml(item.note) + '</p>' : '') +
+          '<button class="text-button" type="button" data-action="pick-day" data-date="' + date +
+          '">Se dagen →</button></article>';
+      }).join("") + '</div></section>';
+  }
   function renderProgress() {
     const stats = currentStats();
     const percent = Math.round((stats.completedDays / P.totalDays) * 100);
@@ -263,6 +327,7 @@
       statCard("↗", stats.repetitions.toLocaleString("sv-SE"), "Totalt gjorda repetitioner") +
       statCard("◒", String(stats.partialDays), "Påbörjade dagar") + '</section>' +
       '<section><div class="section-header"><h2>Din träningskalender</h2></div>' + calendar() + '</section>' +
+      renderReflections() +
       '<div class="week-summary"><div><h3>Du gör framsteg 💗</h3><p>Vissa dagar är fulla av energi, andra går långsammare. Båda är okej.</p></div></div></div>';
   }
   function statCard(icon, number, label) {
@@ -360,6 +425,15 @@
     state.calendarMonth = date.slice(0, 7);
     switchTab("today");
   }
+  function shiftWeek(value) {
+    const current = Math.floor(dayNumber(state.viewDate) / 7);
+    const target = current + value;
+    if (![-1, 1].includes(value) || target < 0 || target >= P.weeks.length) return;
+    const date = addDays(state.data.startDate, target * 7);
+    if (!isAvailableDay(date)) return;
+    state.viewDate = date;
+    render(false);
+  }
   function setMonth(value) {
     if (!/^\d{4}-\d{2}$/.test(value)) return;
     const earliest = state.data.startDate.slice(0, 7);
@@ -414,6 +488,7 @@
       editDay("toggle", button.dataset.exercise); return;
     }
     if (action === "boost") { editDay("boost"); return; }
+    if (action === "week-shift") { shiftWeek(Number(button.dataset.shift)); return; }
     if (action === "pick-day") { jumpTo(button.dataset.date); return; }
     if (action === "jump-today") { jumpTo(maxDate()); return; }
     if (action === "open-week") {
@@ -448,6 +523,21 @@
       switchTab("today");
       toast("Nu börjar din nya träningsresa! 💗");
     }
+  });
+  document.addEventListener("submit", function (event) {
+    if (!event.target || event.target.id !== "journal-form") return;
+    event.preventDefault();
+    const date = state.viewDate;
+    if (!isAvailableDay(date)) return;
+    const noteField = document.getElementById("journal-note");
+    const selected = event.target.querySelector('input[name="feeling"]:checked');
+    const note = noteField && typeof noteField.value === "string" ? noteField.value.trim().slice(0, 280) : "";
+    if (!state.data.days[date]) state.data.days[date] = { done: {}, boost: false, overrides: {} };
+    state.data.days[date].note = note;
+    state.data.days[date].feeling = selected && ["easy", "steady", "hard"].includes(selected.value) ? selected.value : "";
+    if (!save()) return;
+    render(false);
+    toast("Reflektionen är sparad.");
   });
   document.getElementById("reps-form"); // Formuläret skapas vid behov i dialogen.
   dialog.addEventListener("submit", function (event) {
