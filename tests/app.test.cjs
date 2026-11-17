@@ -93,3 +93,50 @@ test("renders the daily checklist and checks exercises off", function () {
   click({ tab: "settings" });
   assert.match(html(), /Exportera säkerhetskopia/);
 });
+
+
+test("daily reflections survive local storage and backup validation", function () {
+  const { window } = environment(false);
+  const storage = window.LINDA_STORAGE;
+  const today = storage.today();
+  const record = storage.load();
+  record.days[today] = { done: {}, boost: false, overrides: {}, feeling: "steady", note: "  Jag blev starkare!  " };
+  assert.equal(storage.save(record), true);
+  const restored = storage.load().days[today];
+  assert.equal(restored.feeling, "steady");
+  assert.equal(restored.note, "Jag blev starkare!");
+  const backup = storage.validateImport({ app: "lindas-revolt", data: storage.load() });
+  assert.equal(backup.days[today].note, "Jag blev starkare!");
+
+  record.days[today].feeling = "invalid";
+  record.days[today].note = "x".repeat(500);
+  const cleaned = storage.validateImport({ app: "lindas-revolt", data: record });
+  assert.equal(cleaned.days[today].feeling, "");
+  assert.equal(cleaned.days[today].note.length, 280);
+});
+
+test("journal and week controls render and notes display without HTML injection", function () {
+  const { nodes, events, window } = environment(true);
+  const html = () => nodes["main-view"].innerHTML;
+  assert.match(html(), /Hur kändes det idag/);
+  assert.match(html(), /Vecka 1 av 10/);
+  assert.match(html(), /Nästa vecka/);
+  assert.match(html(), /Den här veckan/);
+  assert.match(html(), /Spara/);
+
+  nodes["journal-note"] = { value: "  Starkare <script>alert(1)</script>  " };
+  events.submit({
+    target: { id: "journal-form", querySelector() { return { value: "hard" }; } },
+    preventDefault() {}
+  });
+  const date = window.LINDA_STORAGE.today();
+  assert.equal(window.LINDA_STORAGE.load().days[date].feeling, "hard");
+  assert.equal(window.LINDA_STORAGE.load().days[date].note, "Starkare <script>alert(1)</script>");
+  assert.match(html(), /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+  assert.doesNotMatch(html(), /<script>alert\(1\)<\/script>/);
+
+  events.click({ target: { closest() { return { dataset: { tab: "progress" }, disabled: false }; } } });
+  assert.match(html(), /Dina reflektioner/);
+  assert.match(html(), /Utmanande/);
+  assert.match(html(), /Starkare &lt;script&gt;/);
+});
