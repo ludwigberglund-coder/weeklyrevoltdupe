@@ -7,10 +7,12 @@ En enkel, mobilanpassad träningsapp för Linda, inspirerad av konceptet med dag
 - 10 veckor / 70 dagar med två dagliga övningar (från 5 till 50 repetitioner).
 - Markera övningar klara var för sig; gå tillbaka och se tidigare dagar.
 - Veckoprogram, kalender, statistik och svit.
+- Bläddra mellan veckor med pilar och följ antal helt avklarade dagar i veckan.
+- Privat träningsdagbok: välj hur dagen kändes och spara en kort anteckning (max 280 tecken); de senaste reflektionerna visas under Framsteg.
 - Valfri boost (+5 repetitioner per övning) och anpassning av dagens antal.
 - Alla träningsdata sparas **lokalt i webbläsaren** på just den enheten.
 - JSON-export/import av säkerhetskopia, om du byter telefon eller rensar webbplatsdata.
-- Installationsbar som webbapp på iPhone/Android; efter första besöket kan appen fungera offline.
+- Installationsbar som webbapp på iPhone/Android; efter första besöket kan appen fungera offline. När internet finns försöker appen alltid läsa in den senaste publicerade versionen.
 - Utan backend, inloggning, cookies för spårning, analytics eller externa paket.
 
 ## Publicera gratis med GitHub Pages
