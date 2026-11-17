@@ -294,6 +294,25 @@
     return html + '</div><div class="calendar-legend"><span><i class="legend-dot"></i>Avklarat</span>' +
       '<span><i class="legend-dot is-partial"></i>Påbörjat</span></div></section>';
   }
+  function renderReflections() {
+    const names = { easy: "Lätt", steady: "Lagom", hard: "Utmanande" };
+    const entries = Object.keys(state.data.days).filter(function (date) {
+      const item = dayData(date);
+      return isAvailableDay(date) && (item.note || names[item.feeling]);
+    }).sort().reverse().slice(0, 4);
+    if (!entries.length) return '<section class="settings-card"><h2>Dina reflektioner</h2>' +
+      '<p style="margin-bottom:0">När du skriver några ord om en dag dyker de upp här. Små minnen av din träning.</p></section>';
+    return '<section class="reflection-section"><div class="section-header"><h2>Dina reflektioner</h2>' +
+      '<span class="pill">Senaste 4</span></div><div class="reflection-list">' +
+      entries.map(function (date) {
+        const item = dayData(date);
+        return '<article class="reflection-item"><div><strong>' + escapeHtml(formatDate(date)) +
+          '</strong>' + (names[item.feeling] ? '<span class="reflection-feeling">' + names[item.feeling] + '</span>' : '') +
+          '</div>' + (item.note ? '<p>' + escapeHtml(item.note) + '</p>' : '') +
+          '<button class="text-button" type="button" data-action="pick-day" data-date="' + date +
+          '">Se dagen →</button></article>';
+      }).join("") + '</div></section>';
+  }
   function renderProgress() {
     const stats = currentStats();
     const percent = Math.round((stats.completedDays / P.totalDays) * 100);
@@ -308,6 +327,7 @@
       statCard("↗", stats.repetitions.toLocaleString("sv-SE"), "Totalt gjorda repetitioner") +
       statCard("◒", String(stats.partialDays), "Påbörjade dagar") + '</section>' +
       '<section><div class="section-header"><h2>Din träningskalender</h2></div>' + calendar() + '</section>' +
+      renderReflections() +
       '<div class="week-summary"><div><h3>Du gör framsteg 💗</h3><p>Vissa dagar är fulla av energi, andra går långsammare. Båda är okej.</p></div></div></div>';
   }
   function statCard(icon, number, label) {
