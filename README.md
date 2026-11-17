@@ -28,13 +28,13 @@ Framsteg synkroniseras **inte** mellan Safari, Chrome eller andra enheter. Att r
 
 ## Starta lokalt
 
-Sidan fungerar med en statisk server. Exempel: kör \`python3 -m http.server 8000\` i repot och öppna \`http://localhost:8000\`. Direktöppning av index.html via \`file://\` rekommenderas inte för service worker-funktionen.
+Sidan fungerar med en statisk server. Exempel: kör `python3 -m http.server 8000` i repot och öppna `http://localhost:8000`. Direktöppning av index.html via `file://` rekommenderas inte för service worker-funktionen.
 
 ## Ändra programmet
 
-- \`js/program.js\`: veckornas antal, kompletterande övningar, texter och tekniktips.
-- \`js/storage.js\`: säkra, lokala data och import/exportkontroller.
-- \`js/app.js\`: vyer, navigation och interaktioner.
-- \`styles.css\`: färger, komponenter och mobilanpassning.
+- `js/program.js`: veckornas antal, kompletterande övningar, texter och tekniktips.
+- `js/storage.js`: säkra, lokala data och import/exportkontroller.
+- `js/app.js`: vyer, navigation och interaktioner.
+- `styles.css`: färger, komponenter och mobilanpassning.
 
 Det går att bygga vidare med exempelvis nya träningsperioder, videor man själv har rättigheter till och fler övningar, utan att börja om.

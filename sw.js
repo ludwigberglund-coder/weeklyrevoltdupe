@@ -1,8 +1,8 @@
 /* Offline-cache för den statiska appen. Lokal träningsdata rörs aldrig. */
-const CACHE = "lindas-revolt-static-v1";
+const CACHE = "lindas-revolt-static-v2";
 const URLS = [
   "./", "./index.html", "./styles.css", "./js/program.js", "./js/storage.js", "./js/app.js",
-  "./assets/icon.svg", "./assets/apple-touch-icon.svg", "./manifest.webmanifest"
+  "./assets/icon.svg", "./assets/apple-touch-icon.png", "./manifest.webmanifest"
 ];
 self.addEventListener("install", function (event) {
   event.waitUntil(caches.open(CACHE).then(function (cache) {
